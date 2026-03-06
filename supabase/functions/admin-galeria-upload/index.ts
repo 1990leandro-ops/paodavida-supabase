@@ -46,10 +46,15 @@ serve(async (req) => {
 
     const publicUrl = urlData.publicUrl
 
-    // Salva na tabela galeria
+    // Salva na tabela galeria nos dois campos
     const { error: dbError } = await supabase
       .from("galeria")
-      .insert({ url: publicUrl, likes: 0 })
+      .insert({
+        imagem: publicUrl,
+        url: publicUrl,
+        likes: 0,
+        likes_count: 0,
+      })
 
     if (dbError) {
       return new Response(
