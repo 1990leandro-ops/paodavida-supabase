@@ -3,9 +3,11 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
 serve(async (req) => {
   try {
-    const { bucket, filename, contentType, fileBase64 } = await req.json()
+    const { bucket, filename, contentType, fileBase64, base64 } = await req.json()
+    const b64 = fileBase64 || base64
+    const bucketName = bucket || "galeria"
 
-    if (!fileBase64 || !filename) {
+    if (!b64 || !filename) {
       return new Response(
         JSON.stringify({ error: "Dados incompletos" }),
         { status: 400, headers: { "Content-Type": "application/json" } }
@@ -17,16 +19,14 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     )
 
-    // Converte base64 para Uint8Array
-    const binary = atob(fileBase64)
+    const binary = atob(b64)
     const bytes = new Uint8Array(binary.length)
     for (let i = 0; i < binary.length; i++) {
       bytes[i] = binary.charCodeAt(i)
     }
 
-    // Upload no Storage
     const { error: uploadError } = await supabase.storage
-      .from(bucket)
+      .from(bucketName)
       .upload(filename, bytes, {
         contentType: contentType || "image/jpeg",
         upsert: true,
@@ -39,14 +39,12 @@ serve(async (req) => {
       )
     }
 
-    // Pega URL pública
     const { data: urlData } = supabase.storage
-      .from(bucket)
+      .from(bucketName)
       .getPublicUrl(filename)
 
     const publicUrl = urlData.publicUrl
 
-    // Salva na tabela galeria nos dois campos
     const { error: dbError } = await supabase
       .from("galeria")
       .insert({
