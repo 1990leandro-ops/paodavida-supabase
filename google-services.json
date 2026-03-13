@@ -1,0 +1,33 @@
+
+
+
+
+{
+  "project_info": {
+    "project_number": "988798449324",
+    "project_id": "paodavida-7174d",
+    "storage_bucket": "paodavida-7174d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:988798449324:android:1f5a4db0d5a2c8d3559109",
+        "android_client_info": {
+          "package_name": "com.paodavida.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBAFEKFUuvVL7JHIZui5sbTFPjQ102NP8w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
