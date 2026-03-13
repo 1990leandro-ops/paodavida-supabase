@@ -2,6 +2,7 @@ export default {
   expo: {
     name: "Pão da Vida",
     slug: "paodavida",
+
     scheme: "paodavida",
     version: "1.0.2",
     orientation: "portrait",
@@ -11,29 +12,27 @@ export default {
     updates: {
       url: "https://u.expo.dev/626675d9-6560-459a-b2a1-d33518cefd47",
       enabled: true,
-      fallbackToCacheTimeout: 0,
-      checkAutomatically: "ON_LOAD",
+      fallbackToCacheTimeout: 0
     },
 
     runtimeVersion: {
-      policy: "appVersion",
+      policy: "appVersion"
     },
 
     splash: {
       image: "./assets/logo.png",
       resizeMode: "contain",
-      backgroundColor: "#ffffff",
+      backgroundColor: "#ffffff"
     },
 
     android: {
       package: "com.paodavida.app",
       versionCode: 4,
-      jsEngine: "jsc",
-      permissions: ["NOTIFICATIONS"],
       adaptiveIcon: {
         foregroundImage: "./assets/logo.png",
-        backgroundColor: "#ffffff",
+        backgroundColor: "#ffffff"
       },
+      permissions: ["NOTIFICATIONS"]
     },
 
     assetBundlePatterns: ["**/*"],
@@ -45,8 +44,8 @@ export default {
 
     extra: {
       eas: {
-        projectId: "626675d9-6560-459a-b2a1-d33518cefd47",
-      },
-    },
-  },
-};
+        projectId: "626675d9-6560-459a-b2a1-d33518cefd47"
+      }
+    }
+  }
+}
