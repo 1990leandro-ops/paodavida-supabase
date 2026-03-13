@@ -12,7 +12,9 @@ export default {
       url: "https://u.expo.dev/626675d9-6560-459a-b2a1-d33518cefd47",
       enabled: true,
       fallbackToCacheTimeout: 0,
+      checkAutomatically: "ON_LOAD",
     },
+
     runtimeVersion: {
       policy: "appVersion",
     },
@@ -26,19 +28,19 @@ export default {
     android: {
       package: "com.paodavida.app",
       versionCode: 4,
+      jsEngine: "jsc",
+      permissions: ["NOTIFICATIONS"],
       adaptiveIcon: {
         foregroundImage: "./assets/logo.png",
         backgroundColor: "#ffffff",
       },
-      permissions: ["NOTIFICATIONS"],
-      jsEngine: "jsc",
     },
 
     assetBundlePatterns: ["**/*"],
 
     plugins: [
       "expo-router",
-      "expo-notifications",
+      "expo-notifications"
     ],
 
     extra: {

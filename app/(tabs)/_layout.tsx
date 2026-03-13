@@ -1,7 +1,10 @@
 import { Tabs } from "expo-router";
 import { Text } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function TabsLayout() {
+  const insets = useSafeAreaInsets();
+
   return (
     <Tabs
       screenOptions={{
@@ -9,8 +12,9 @@ export default function TabsLayout() {
         tabBarActiveTintColor: "#065f46",
         tabBarInactiveTintColor: "#6b7280",
         tabBarStyle: {
-          height: 78,
-          paddingBottom: 10,
+          position: "absolute",
+          height: 68 + insets.bottom,
+          paddingBottom: insets.bottom > 0 ? insets.bottom : 10,
           paddingTop: 10,
         },
         tabBarLabelStyle: {
@@ -24,7 +28,9 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: "Início",
-          tabBarIcon: ({ size }) => <Text style={{ fontSize: size }}>🏠</Text>,
+          tabBarIcon: ({ size }) => (
+            <Text style={{ fontSize: size }}>🏠</Text>
+          ),
         }}
       />
 
@@ -32,7 +38,9 @@ export default function TabsLayout() {
         name="avisos"
         options={{
           title: "Avisos",
-          tabBarIcon: ({ size }) => <Text style={{ fontSize: size }}>📢</Text>,
+          tabBarIcon: ({ size }) => (
+            <Text style={{ fontSize: size }}>📢</Text>
+          ),
         }}
       />
 
@@ -40,7 +48,9 @@ export default function TabsLayout() {
         name="biblia"
         options={{
           title: "Bíblia",
-          tabBarIcon: ({ size }) => <Text style={{ fontSize: size }}>📖</Text>,
+          tabBarIcon: ({ size }) => (
+            <Text style={{ fontSize: size }}>📖</Text>
+          ),
         }}
       />
 
@@ -48,7 +58,9 @@ export default function TabsLayout() {
         name="dizimos"
         options={{
           title: "Contrib.",
-          tabBarIcon: ({ size }) => <Text style={{ fontSize: size }}>💼</Text>,
+          tabBarIcon: ({ size }) => (
+            <Text style={{ fontSize: size }}>💼</Text>
+          ),
         }}
       />
 
@@ -56,49 +68,17 @@ export default function TabsLayout() {
         name="perfil"
         options={{
           title: "Perfil",
-          tabBarIcon: ({ size }) => <Text style={{ fontSize: size }}>👤</Text>,
+          tabBarIcon: ({ size }) => (
+            <Text style={{ fontSize: size }}>👤</Text>
+          ),
         }}
       />
 
-      <Tabs.Screen
-        name="devocional"
-        options={{
-          title: "Devocional",
-          href: null,
-        }}
-      />
-
-      <Tabs.Screen
-        name="oracao"
-        options={{
-          title: "Oração",
-          href: null,
-        }}
-      />
-
-      <Tabs.Screen
-        name="emocoes"
-        options={{
-          title: "Emoções",
-          href: null,
-        }}
-      />
-
-      <Tabs.Screen
-        name="galeria"
-        options={{
-          title: "Galeria",
-          href: null,
-        }}
-      />
-
-      <Tabs.Screen
-        name="versiculo"
-        options={{
-          title: "Versículo",
-          href: null,
-        }}
-      />
+      <Tabs.Screen name="devocional" options={{ title: "Devocional", href: null }} />
+      <Tabs.Screen name="oracao" options={{ title: "Oração", href: null }} />
+      <Tabs.Screen name="emocoes" options={{ title: "Emoções", href: null }} />
+      <Tabs.Screen name="galeria" options={{ title: "Galeria", href: null }} />
+      <Tabs.Screen name="versiculo" options={{ title: "Versículo", href: null }} />
     </Tabs>
   );
 }

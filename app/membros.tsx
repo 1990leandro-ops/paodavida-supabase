@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { router } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { obterIgrejaSelecionada } from "@/lib/igrejaSelecionada";
 
@@ -45,6 +46,9 @@ export default function MembrosScreen() {
   const [igreja, setIgreja] = useState<IgrejaSelecionada | null>(null);
   const [membros, setMembros] = useState<Membro[]>([]);
 
+  const [usuarioLogado, setUsuarioLogado] = useState(false);
+  const [podeVerMembros, setPodeVerMembros] = useState(false);
+
   const [nome, setNome] = useState("");
   const [telefone, setTelefone] = useState("");
   const [email, setEmail] = useState("");
@@ -62,6 +66,32 @@ export default function MembrosScreen() {
     try {
       setLoading(true);
 
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        Alert.alert("Acesso restrito", "Faça login para acessar esta área.");
+        router.replace("/login");
+        return;
+      }
+
+      setUsuarioLogado(true);
+
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+
+      if (profileError) {
+        console.log("Erro ao buscar perfil:", profileError.message);
+      }
+
+      const role = profile?.role;
+      const podeVer = role === "admin" || role === "lider";
+      setPodeVerMembros(podeVer);
+
       const igrejaSalva = await obterIgrejaSelecionada();
 
       if (!igrejaSalva?.id) {
@@ -76,7 +106,11 @@ export default function MembrosScreen() {
         cidade: igrejaSalva.cidade || "",
       });
 
-      await carregarMembros(igrejaSalva.id);
+      if (podeVer) {
+        await carregarMembros(igrejaSalva.id);
+      } else {
+        setMembros([]);
+      }
     } catch (error: any) {
       Alert.alert("Membros", error?.message || "Erro ao carregar membros.");
     } finally {
@@ -92,6 +126,7 @@ export default function MembrosScreen() {
       .order("created_at", { ascending: false });
 
     if (error) {
+      console.log("Erro ao carregar membros:", error.message);
       setMembros([]);
       return;
     }
@@ -100,7 +135,7 @@ export default function MembrosScreen() {
   }
 
   async function atualizar() {
-    if (!igreja?.id) return;
+    if (!igreja?.id || !podeVerMembros) return;
 
     try {
       setRefreshing(true);
@@ -123,6 +158,12 @@ export default function MembrosScreen() {
 
   async function cadastrarMembro() {
     try {
+      if (!usuarioLogado) {
+        Alert.alert("Membros", "Faça login para cadastrar membros.");
+        router.replace("/login");
+        return;
+      }
+
       if (!igreja?.id) {
         Alert.alert("Membros", "Igreja não identificada.");
         return;
@@ -156,7 +197,10 @@ export default function MembrosScreen() {
 
       Alert.alert("Sucesso", "Membro cadastrado com sucesso.");
       limparFormulario();
-      await carregarMembros(igreja.id);
+
+      if (podeVerMembros) {
+        await carregarMembros(igreja.id);
+      }
     } catch (error: any) {
       Alert.alert("Membros", error?.message || "Erro ao cadastrar membro.");
     } finally {
@@ -202,7 +246,7 @@ export default function MembrosScreen() {
         <View style={styles.card}>
           <Text style={styles.cardLabel}>Igreja selecionada</Text>
           <Text style={styles.cardValue}>
-            {igreja?.cidade ? `${igreja.nome} ${igreja.cidade}` : igreja?.nome || "Igreja"}
+            {igreja?.cidade ? `${igreja.nome} - ${igreja.cidade}` : igreja?.nome || "Igreja"}
           </Text>
         </View>
 
@@ -262,12 +306,7 @@ export default function MembrosScreen() {
                   style={[styles.optionButton, ativo && styles.optionButtonActive]}
                   onPress={() => setEstadoCivil(item)}
                 >
-                  <Text
-                    style={[
-                      styles.optionText,
-                      ativo && styles.optionTextActive,
-                    ]}
-                  >
+                  <Text style={[styles.optionText, ativo && styles.optionTextActive]}>
                     {item}
                   </Text>
                 </TouchableOpacity>
@@ -285,12 +324,7 @@ export default function MembrosScreen() {
                   style={[styles.optionButton, ativo && styles.optionButtonActive]}
                   onPress={() => setStatus(item)}
                 >
-                  <Text
-                    style={[
-                      styles.optionText,
-                      ativo && styles.optionTextActive,
-                    ]}
-                  >
+                  <Text style={[styles.optionText, ativo && styles.optionTextActive]}>
                     {item}
                   </Text>
                 </TouchableOpacity>
@@ -348,62 +382,64 @@ export default function MembrosScreen() {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Membros cadastrados</Text>
+        {podeVerMembros && (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Membros cadastrados</Text>
 
-          {membros.length === 0 ? (
-            <Text style={styles.emptyText}>Nenhum membro cadastrado ainda.</Text>
-          ) : (
-            membros.map((membro) => (
-              <View key={membro.id} style={styles.memberCard}>
-                <Text style={styles.memberName}>{membro.nome}</Text>
+            {membros.length === 0 ? (
+              <Text style={styles.emptyText}>Nenhum membro cadastrado ainda.</Text>
+            ) : (
+              membros.map((membro) => (
+                <View key={membro.id} style={styles.memberCard}>
+                  <Text style={styles.memberName}>{membro.nome}</Text>
 
-                {!!membro.telefone && (
-                  <Text style={styles.memberText}>Telefone: {membro.telefone}</Text>
-                )}
+                  {!!membro.telefone && (
+                    <Text style={styles.memberText}>Telefone: {membro.telefone}</Text>
+                  )}
 
-                {!!membro.email && (
-                  <Text style={styles.memberText}>E-mail: {membro.email}</Text>
-                )}
+                  {!!membro.email && (
+                    <Text style={styles.memberText}>E-mail: {membro.email}</Text>
+                  )}
 
-                {!!membro.data_nascimento && (
+                  {!!membro.data_nascimento && (
+                    <Text style={styles.memberText}>
+                      Nascimento: {membro.data_nascimento}
+                    </Text>
+                  )}
+
+                  {!!membro.endereco && (
+                    <Text style={styles.memberText}>Endereço: {membro.endereco}</Text>
+                  )}
+
+                  {!!membro.estado_civil && (
+                    <Text style={styles.memberText}>
+                      Estado civil: {membro.estado_civil}
+                    </Text>
+                  )}
+
+                  {!!membro.status && (
+                    <Text style={styles.memberText}>Status: {membro.status}</Text>
+                  )}
+
                   <Text style={styles.memberText}>
-                    Nascimento: {membro.data_nascimento}
+                    Batizado:{" "}
+                    {membro.batizado === true
+                      ? "Sim"
+                      : membro.batizado === false
+                      ? "Não"
+                      : "Não informado"}
                   </Text>
-                )}
 
-                {!!membro.endereco && (
-                  <Text style={styles.memberText}>Endereço: {membro.endereco}</Text>
-                )}
-
-                {!!membro.estado_civil && (
-                  <Text style={styles.memberText}>
-                    Estado civil: {membro.estado_civil}
-                  </Text>
-                )}
-
-                {!!membro.status && (
-                  <Text style={styles.memberText}>Status: {membro.status}</Text>
-                )}
-
-                <Text style={styles.memberText}>
-                  Batizado:{" "}
-                  {membro.batizado === true
-                    ? "Sim"
-                    : membro.batizado === false
-                    ? "Não"
-                    : "Não informado"}
-                </Text>
-
-                {!!membro.created_at && (
-                  <Text style={styles.smallMuted}>
-                    {formatarData(membro.created_at)}
-                  </Text>
-                )}
-              </View>
-            ))
-          )}
-        </View>
+                  {!!membro.created_at && (
+                    <Text style={styles.smallMuted}>
+                      {formatarData(membro.created_at)}
+                    </Text>
+                  )}
+                </View>
+              ))
+            )}
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -525,28 +561,28 @@ const styles = StyleSheet.create({
     backgroundColor: "#f9fafb",
     borderWidth: 1,
     borderColor: "#e5e7eb",
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 12,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 14,
   },
   memberName: {
     fontSize: 18,
     fontWeight: "800",
     color: "#111827",
-    marginBottom: 8,
+    marginBottom: 10,
   },
   memberText: {
-    fontSize: 14,
+    fontSize: 15,
     color: "#4b5563",
-    lineHeight: 21,
-    marginBottom: 4,
+    marginBottom: 6,
   },
   smallMuted: {
-    marginTop: 8,
-    fontSize: 12,
+    marginTop: 10,
+    fontSize: 13,
     color: "#6b7280",
   },
   emptyText: {
     color: "#6b7280",
+    fontSize: 15,
   },
 });

@@ -57,33 +57,50 @@ const VERSICULOS = [
 export default function HomeScreen() {
   const [igreja, setIgreja] = useState<Igreja | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [podeVerMembros, setPodeVerMembros] = useState(false);
   const [aniversariantesMes, setAniversariantesMes] = useState<
     MembroAniversariante[]
   >([]);
 
   useEffect(() => {
     carregarIgreja();
-    verificarAdmin();
+    verificarPermissoes();
     carregarAniversariantesDoMes();
   }, []);
 
-  async function verificarAdmin() {
+  async function verificarPermissoes() {
     try {
-      const { data } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-      if (!data?.user) return;
+      if (!user) {
+        setIsAdmin(false);
+        setPodeVerMembros(false);
+        return;
+      }
 
-      const { data: profile } = await supabase
+      const { data: profile, error } = await supabase
         .from("profiles")
         .select("role")
-        .eq("id", data.user.id)
+        .eq("id", user.id)
         .single();
 
-      if (profile?.role === "admin") {
-        setIsAdmin(true);
+      if (error) {
+        console.log("Erro ao buscar perfil:", error.message);
+        setIsAdmin(false);
+        setPodeVerMembros(false);
+        return;
       }
+
+      const role = profile?.role;
+
+      setIsAdmin(role === "admin");
+      setPodeVerMembros(role === "admin" || role === "lider");
     } catch (error) {
-      console.log("Erro ao verificar admin:", error);
+      console.log("Erro ao verificar permissões:", error);
+      setIsAdmin(false);
+      setPodeVerMembros(false);
     }
   }
 
@@ -167,7 +184,6 @@ export default function HomeScreen() {
     if (!data) return 99;
 
     const texto = String(data).trim();
-
     if (texto.includes("/")) {
       const partes = texto.split("/");
       return Number(partes[0]) || 99;
@@ -281,9 +297,7 @@ export default function HomeScreen() {
 
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Versículo do dia</Text>
-
           <Text style={styles.versiculo}>“{versiculo.texto}”</Text>
-
           <Text style={styles.referencia}>{versiculo.referencia}</Text>
         </View>
 
@@ -316,7 +330,11 @@ export default function HomeScreen() {
           <Botao icon="🙏" label="Oração" rota="/oracao" />
           <Botao icon="💰" label="Contribuições" rota="/dizimos" />
           <Botao icon="😊" label="Emoções" rota="/emocoes" />
-          <Botao icon="👥" label="Membros" rota="/membros" />
+
+          {podeVerMembros && (
+            <Botao icon="👥" label="Membros" rota="/membros" />
+          )}
+
           <Botao icon="👤" label="Perfil" rota="/perfil" />
 
           {isAdmin && (
