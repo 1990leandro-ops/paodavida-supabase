@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Image,
   Linking,
@@ -27,40 +27,63 @@ type MembroAniversariante = {
   data_nascimento?: string | null;
 };
 
-const VERSICULOS = [
-  {
-    referencia: "Jó 42:2",
-    texto: "Bem sei que tudo podes, e nenhum dos teus planos pode ser frustrado.",
-  },
-  {
-    referencia: "Salmos 37:5",
-    texto: "Entrega o teu caminho ao Senhor; confia nele, e ele tudo fará.",
-  },
-  {
-    referencia: "Provérbios 3:5",
-    texto: "Confia no Senhor de todo o teu coração e não te apoies no teu próprio entendimento.",
-  },
-  {
-    referencia: "Isaías 41:10",
-    texto: "Não temas, porque eu sou contigo; não te assombres, porque eu sou teu Deus.",
-  },
-  {
-    referencia: "Romanos 8:28",
-    texto: "Sabemos que todas as coisas cooperam para o bem daqueles que amam a Deus.",
-  },
-];
+type Versiculo = {
+  texto: string;
+  referencia: string;
+};
+
+const TOKEN_BIBLIA =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdHIiOiJTYXQgTWFyIDE0IDIwMjYgMDE6MjM6MTcgR01UKzAwMDAuMTk5MGxlYW5kcm9AZ21haWwuY29tIiwiaWF0IjoxNzczNDUxMzk3fQ.yzwsvndzrmrEk2can3Dj6GeZOiT6gWbN8PckgPpGcz4";
+
+const VERSICULO_FALLBACK: Versiculo = {
+  texto:
+    "Confia no Senhor de todo o teu coração e não te apoies no teu próprio entendimento.",
+  referencia: "Provérbios 3:5",
+};
 
 export default function HomeScreen() {
   const [igreja, setIgreja] = useState<Igreja | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [usuarioLogado, setUsuarioLogado] = useState(false);
   const [aniversariantesMes, setAniversariantesMes] = useState<MembroAniversariante[]>([]);
+  const [versiculo, setVersiculo] = useState<Versiculo>(VERSICULO_FALLBACK);
+  const [carregandoVersiculo, setCarregandoVersiculo] = useState(true);
 
   useEffect(() => {
     carregarIgreja();
     verificarPermissoes();
     carregarAniversariantesDoMes();
+    carregarVersiculoDoDia();
   }, []);
+
+  async function carregarVersiculoDoDia() {
+    try {
+      setCarregandoVersiculo(true);
+      const response = await fetch(
+        "https://www.abibliadigital.com.br/api/verses/day",
+        {
+          headers: {
+            Authorization: `Bearer ${TOKEN_BIBLIA}`,
+          },
+        }
+      );
+
+      if (!response.ok) return;
+
+      const data = await response.json();
+
+      if (data?.text && data?.book?.name && data?.chapter && data?.number) {
+        setVersiculo({
+          texto: data.text,
+          referencia: `${data.book.name} ${data.chapter}:${data.number}`,
+        });
+      }
+    } catch (error) {
+      console.log("Erro ao buscar versículo:", error);
+    } finally {
+      setCarregandoVersiculo(false);
+    }
+  }
 
   async function verificarPermissoes() {
     try {
@@ -151,7 +174,9 @@ export default function HomeScreen() {
           return dataNascimento.getMonth() + 1 === mesAtual;
         }) || [];
 
-      filtrados.sort((a, b) => extrairDia(a.data_nascimento) - extrairDia(b.data_nascimento));
+      filtrados.sort(
+        (a, b) => extrairDia(a.data_nascimento) - extrairDia(b.data_nascimento)
+      );
       setAniversariantesMes(filtrados);
     } catch (error) {
       console.log("Erro geral ao carregar aniversariantes do mês:", error);
@@ -180,13 +205,6 @@ export default function HomeScreen() {
     return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`;
   }
 
-  const versiculo = useMemo(() => {
-    const hoje = new Date();
-    const inicioAno = new Date(hoje.getFullYear(), 0, 0);
-    const dia = Math.floor((hoje.getTime() - inicioAno.getTime()) / 86400000);
-    return VERSICULOS[dia % VERSICULOS.length];
-  }, []);
-
   async function abrirInstagram() {
     if (!igreja?.instagram) return;
     const url = igreja.instagram.startsWith("http")
@@ -203,6 +221,7 @@ export default function HomeScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
+        {/* Hero */}
         <View style={styles.hero}>
           <View style={styles.heroHeader}>
             {!!igreja?.logo_url && (
@@ -219,6 +238,7 @@ export default function HomeScreen() {
           </Text>
         </View>
 
+        {/* Igreja */}
         <View style={styles.card}>
           <Text style={styles.cardLabel}>Igreja selecionada</Text>
           <View style={styles.igrejaRow}>
@@ -239,12 +259,20 @@ export default function HomeScreen() {
           )}
         </View>
 
-        <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Versículo do dia</Text>
-          <Text style={styles.versiculo}>"{versiculo.texto}"</Text>
-          <Text style={styles.referencia}>{versiculo.referencia}</Text>
+        {/* Versículo do dia */}
+        <View style={styles.versiculoCard}>
+          <Text style={styles.versiculoLabel}>✨ Versículo do dia</Text>
+          {carregandoVersiculo ? (
+            <Text style={styles.versiculoCarregando}>Carregando...</Text>
+          ) : (
+            <>
+              <Text style={styles.versiculoTexto}>"{versiculo.texto}"</Text>
+              <Text style={styles.versiculoReferencia}>{versiculo.referencia}</Text>
+            </>
+          )}
         </View>
 
+        {/* Aniversariantes */}
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>🎂 Aniversariantes do mês</Text>
           {aniversariantesMes.length === 0 ? (
@@ -261,8 +289,8 @@ export default function HomeScreen() {
           )}
         </View>
 
+        {/* Acesso rápido */}
         <Text style={styles.sectionTitle}>Acesso rápido</Text>
-
         <View style={styles.grid}>
           <Botao icon="📢" label="Avisos" rota="/avisos" />
           <Botao icon="📚" label="Devocional" rota="/devocional" />
@@ -309,12 +337,14 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: "#f3f4f6" },
   container: { flex: 1 },
   content: { padding: 20, paddingBottom: 180 },
+
   hero: { backgroundColor: "#065f46", borderRadius: 24, padding: 20, marginBottom: 18 },
   heroHeader: { flexDirection: "row", alignItems: "center", marginBottom: 10 },
   heroLogo: { width: 60, height: 60, marginRight: 12, borderRadius: 12, backgroundColor: "#fff" },
   heroTitle: { fontSize: 26, fontWeight: "800", color: "#fff" },
   heroSub: { color: "#d1fae5", fontSize: 14 },
   heroText: { color: "#ecfdf5", fontSize: 15, lineHeight: 24 },
+
   card: {
     backgroundColor: "#fff",
     padding: 18,
@@ -336,9 +366,41 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
   },
   instagramText: { color: "#fff", fontWeight: "700" },
+
+  // Versículo com destaque especial
+  versiculoCard: {
+    backgroundColor: "#065f46",
+    padding: 22,
+    borderRadius: 18,
+    marginBottom: 16,
+  },
+  versiculoLabel: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#a7f3d0",
+    marginBottom: 12,
+    textTransform: "uppercase",
+    letterSpacing: 1,
+  },
+  versiculoTexto: {
+    fontSize: 18,
+    fontStyle: "italic",
+    color: "#fff",
+    lineHeight: 30,
+    marginBottom: 12,
+  },
+  versiculoReferencia: {
+    fontSize: 14,
+    fontWeight: "800",
+    color: "#6ee7b7",
+  },
+  versiculoCarregando: {
+    fontSize: 15,
+    color: "#a7f3d0",
+    fontStyle: "italic",
+  },
+
   sectionTitle: { fontSize: 18, fontWeight: "800", marginBottom: 12 },
-  versiculo: { fontSize: 17, fontStyle: "italic", marginBottom: 8, color: "#111827", lineHeight: 28 },
-  referencia: { fontWeight: "700", color: "#4b5563" },
   emptyText: { color: "#6b7280", fontSize: 15 },
   aniversarianteRow: {
     flexDirection: "row",
@@ -350,6 +412,7 @@ const styles = StyleSheet.create({
   },
   aniversarianteNome: { fontSize: 15, fontWeight: "600", color: "#111827", flex: 1, marginRight: 8 },
   aniversarianteData: { fontSize: 14, fontWeight: "700", color: "#065f46" },
+
   grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" },
   gridItem: {
     width: "48%",
