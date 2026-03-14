@@ -71,8 +71,7 @@ export default function MembrosScreen() {
       } = await supabase.auth.getUser();
 
       if (!user) {
-        Alert.alert("Acesso restrito", "Faça login para acessar esta área.");
-        router.replace("/login");
+        setUsuarioLogado(false);
         return;
       }
 
@@ -228,6 +227,25 @@ export default function MembrosScreen() {
     );
   }
 
+  if (!usuarioLogado) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <View style={styles.center}>
+          <Text style={styles.lockTitle}>🔒 Área restrita</Text>
+          <Text style={styles.lockSubtitle}>
+            Faça login para acessar o cadastro de membros.
+          </Text>
+          <TouchableOpacity
+            style={styles.primaryButton}
+            onPress={() => router.replace("/login")}
+          >
+            <Text style={styles.primaryButtonText}>Fazer login</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView
@@ -335,35 +353,19 @@ export default function MembrosScreen() {
           <Text style={styles.sectionTitle}>Batizado?</Text>
           <View style={styles.optionWrap}>
             <TouchableOpacity
-              style={[
-                styles.optionButton,
-                batizado === true && styles.optionButtonActive,
-              ]}
+              style={[styles.optionButton, batizado === true && styles.optionButtonActive]}
               onPress={() => setBatizado(true)}
             >
-              <Text
-                style={[
-                  styles.optionText,
-                  batizado === true && styles.optionTextActive,
-                ]}
-              >
+              <Text style={[styles.optionText, batizado === true && styles.optionTextActive]}>
                 Sim
               </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[
-                styles.optionButton,
-                batizado === false && styles.optionButtonActive,
-              ]}
+              style={[styles.optionButton, batizado === false && styles.optionButtonActive]}
               onPress={() => setBatizado(false)}
             >
-              <Text
-                style={[
-                  styles.optionText,
-                  batizado === false && styles.optionTextActive,
-                ]}
-              >
+              <Text style={[styles.optionText, batizado === false && styles.optionTextActive]}>
                 Não
               </Text>
             </TouchableOpacity>
@@ -396,27 +398,18 @@ export default function MembrosScreen() {
                   {!!membro.telefone && (
                     <Text style={styles.memberText}>Telefone: {membro.telefone}</Text>
                   )}
-
                   {!!membro.email && (
                     <Text style={styles.memberText}>E-mail: {membro.email}</Text>
                   )}
-
                   {!!membro.data_nascimento && (
-                    <Text style={styles.memberText}>
-                      Nascimento: {membro.data_nascimento}
-                    </Text>
+                    <Text style={styles.memberText}>Nascimento: {membro.data_nascimento}</Text>
                   )}
-
                   {!!membro.endereco && (
                     <Text style={styles.memberText}>Endereço: {membro.endereco}</Text>
                   )}
-
                   {!!membro.estado_civil && (
-                    <Text style={styles.memberText}>
-                      Estado civil: {membro.estado_civil}
-                    </Text>
+                    <Text style={styles.memberText}>Estado civil: {membro.estado_civil}</Text>
                   )}
-
                   {!!membro.status && (
                     <Text style={styles.memberText}>Status: {membro.status}</Text>
                   )}
@@ -431,9 +424,7 @@ export default function MembrosScreen() {
                   </Text>
 
                   {!!membro.created_at && (
-                    <Text style={styles.smallMuted}>
-                      {formatarData(membro.created_at)}
-                    </Text>
+                    <Text style={styles.smallMuted}>{formatarData(membro.created_at)}</Text>
                   )}
                 </View>
               ))
@@ -446,26 +437,30 @@ export default function MembrosScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: "#f3f4f6",
-  },
-  container: {
-    flex: 1,
-    backgroundColor: "#f3f4f6",
-  },
-  content: {
-    paddingBottom: 120,
-  },
+  safe: { flex: 1, backgroundColor: "#f3f4f6" },
+  container: { flex: 1, backgroundColor: "#f3f4f6" },
+  content: { paddingBottom: 120 },
   center: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#f3f4f6",
+    padding: 30,
   },
-  loadingText: {
-    marginTop: 10,
+  loadingText: { marginTop: 10, color: "#6b7280" },
+  lockTitle: {
+    fontSize: 26,
+    fontWeight: "bold",
+    color: "#111827",
+    marginBottom: 12,
+    textAlign: "center",
+  },
+  lockSubtitle: {
+    fontSize: 16,
     color: "#6b7280",
+    textAlign: "center",
+    marginBottom: 28,
+    lineHeight: 24,
   },
   title: {
     fontSize: 28,
@@ -489,23 +484,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#e5e7eb",
   },
-  cardLabel: {
-    fontSize: 14,
-    color: "#065f46",
-    fontWeight: "700",
-    marginBottom: 8,
-  },
-  cardValue: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#111827",
-  },
-  cardTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 15,
-    color: "#111827",
-  },
+  cardLabel: { fontSize: 14, color: "#065f46", fontWeight: "700", marginBottom: 8 },
+  cardValue: { fontSize: 18, fontWeight: "bold", color: "#111827" },
+  cardTitle: { fontSize: 20, fontWeight: "bold", marginBottom: 15, color: "#111827" },
   input: {
     borderWidth: 1,
     borderColor: "#ddd",
@@ -515,35 +496,12 @@ const styles = StyleSheet.create({
     color: "#111827",
     backgroundColor: "#fff",
   },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: "#111827",
-    marginBottom: 10,
-  },
-  optionWrap: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
-    marginBottom: 18,
-  },
-  optionButton: {
-    backgroundColor: "#e5e7eb",
-    paddingVertical: 12,
-    paddingHorizontal: 18,
-    borderRadius: 999,
-  },
-  optionButtonActive: {
-    backgroundColor: "#065f46",
-  },
-  optionText: {
-    fontSize: 16,
-    color: "#111827",
-    fontWeight: "700",
-  },
-  optionTextActive: {
-    color: "#fff",
-  },
+  sectionTitle: { fontSize: 16, fontWeight: "800", color: "#111827", marginBottom: 10 },
+  optionWrap: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginBottom: 18 },
+  optionButton: { backgroundColor: "#e5e7eb", paddingVertical: 12, paddingHorizontal: 18, borderRadius: 999 },
+  optionButtonActive: { backgroundColor: "#065f46" },
+  optionText: { fontSize: 16, color: "#111827", fontWeight: "700" },
+  optionTextActive: { color: "#fff" },
   primaryButton: {
     backgroundColor: "#065f46",
     padding: 16,
@@ -551,12 +509,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     alignItems: "center",
   },
-  primaryButtonText: {
-    color: "#fff",
-    textAlign: "center",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
+  primaryButtonText: { color: "#fff", textAlign: "center", fontSize: 16, fontWeight: "bold" },
   memberCard: {
     backgroundColor: "#f9fafb",
     borderWidth: 1,
@@ -565,24 +518,8 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 14,
   },
-  memberName: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: "#111827",
-    marginBottom: 10,
-  },
-  memberText: {
-    fontSize: 15,
-    color: "#4b5563",
-    marginBottom: 6,
-  },
-  smallMuted: {
-    marginTop: 10,
-    fontSize: 13,
-    color: "#6b7280",
-  },
-  emptyText: {
-    color: "#6b7280",
-    fontSize: 15,
-  },
+  memberName: { fontSize: 18, fontWeight: "800", color: "#111827", marginBottom: 10 },
+  memberText: { fontSize: 15, color: "#4b5563", marginBottom: 6 },
+  smallMuted: { marginTop: 10, fontSize: 13, color: "#6b7280" },
+  emptyText: { color: "#6b7280", fontSize: 15 },
 });
