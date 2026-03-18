@@ -43,7 +43,7 @@ O projeto aplica conceitos básicos de segurança, incluindo:
 
 ## 📸 Preview do sistema
 
-### 🔐 
+### 🔐 https://github.com/1990leandro-ops/paodavida-supabase/blob/9fdea7794b5ba324dc84c15a736745424bd24659/home.png
 
 ## ▶️ Como rodar o projeto
 
