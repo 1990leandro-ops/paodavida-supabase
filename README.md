@@ -1,87 +1,61 @@
-# 🍞 Pão da Vida Sistemas
+# 🚀 Pão da Vida - Sistema para Igrejas
 
-![Status](https://img.shields.io/badge/status-em%20desenvolvimento-yellow)
-![React](https://img.shields.io/badge/React-Native-blue)
-![Expo](https://img.shields.io/badge/Expo-mobile-black)
-![Supabase](https://img.shields.io/badge/Supabase-database-green)
-![License](https://img.shields.io/badge/license-MIT-blue)
+🔥 Projeto real em desenvolvimento com foco em uso prático e evolução contínua.
 
-Sistema **SaaS para gestão de igrejas**, desenvolvido para centralizar informações de membros, pedidos de oração e administração da igreja em um único sistema digital.
-
-O projeto foi criado como prática de **desenvolvimento web moderno, integrações de sistemas e banco de dados**, utilizando tecnologias atuais do ecossistema JavaScript.
+O **Pão da Vida** é um sistema desenvolvido para auxiliar igrejas na organização de membros, pedidos de oração e comunicação interna, trazendo mais praticidade e acessibilidade para o dia a dia.
 
 ---
 
-# 🚀 Sobre o projeto
+## 💡 Objetivo
 
-O **Pão da Vida Sistemas** tem como objetivo ajudar igrejas a organizarem suas informações de forma simples, digital e acessível.
-
-A aplicação permite que líderes e administradores tenham controle sobre dados importantes da igreja e possam gerenciar informações de maneira eficiente.
+Criar uma solução digital simples, funcional e acessível para igrejas, permitindo melhor gestão de informações e interação entre membros.
 
 ---
 
-# 🧰 Tecnologias Utilizadas
+## 🛠️ Tecnologias utilizadas
 
-- **JavaScript**
-- **React Native**
-- **Expo**
-- **Supabase**
-- **PostgreSQL**
-- **SQL**
-- **Git e GitHub**
+- React Native (Expo)
+- JavaScript
+- Supabase (Backend e banco de dados)
+- APIs externas (versículo do dia)
 
 ---
 
-# 🏗️ Arquitetura do Projeto
+## 🔐 Segurança
 
-O sistema segue uma estrutura baseada em:
-
-Frontend:
-- React Native
-- Expo
-
-Backend:
-- Supabase
-- PostgreSQL
-
-Autenticação:
-- Supabase Auth
-
-Banco de dados:
-- PostgreSQL hospedado no Supabase
+O projeto aplica conceitos básicos de segurança, incluindo:
+- Autenticação de usuários
+- Controle de acesso (admin / membros)
+- Proteção de rotas
 
 ---
 
-# 📱 Funcionalidades
+## 📱 Funcionalidades
 
-✔ Cadastro de membros  
-✔ Área administrativa  
-✔ Pedidos de oração  
-✔ Autenticação de usuários  
-✔ Controle de acesso por usuário  
-✔ Integração com banco de dados em tempo real  
-
----
-
-# 📷 Demonstração
-
-Adicione aqui prints do sistema.
-
-Exemplo:
-
-## Tela inicial
-
-![Tela inicial](images/tela1.png)
-
-## Área de membros
-
-![Área de membros](images/tela2.png)
+✔️ Cadastro e login de usuários  
+✔️ Área exclusiva para membros  
+✔️ Pedidos de oração  
+✔️ Integração com API de versículos  
+✔️ Painel administrativo (em evolução)  
+✔️ Controle de acesso por perfil (admin/líder/membro)  
 
 ---
 
-# ⚙️ Como rodar o projeto
+## 📸 Preview do sistema
 
-Clone o repositório
+### 🔐 
+
+## ▶️ Como rodar o projeto
 
 ```bash
+# Clone o repositório
 git clone https://github.com/1990leandro-ops/paodavida-supabase
+
+# Acesse a pasta
+cd paodavida-supabase
+
+# Instale as dependências
+npm install
+
+# Inicie o projeto
+npx expo start
